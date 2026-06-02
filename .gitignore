@@ -2,7 +2,13 @@ checkpoints/
 *.pth
 *.pt
 
+*.png
+*.jpg
+*.jpeg
+
 __pycache__/
 *.pyc
 
 data/
+
+models/deeplab.py
