@@ -8,66 +8,27 @@ from torchinfo import summary
 import utils.utils as utils
 from data.loaders import get_data_loaders
 from training.cost import CrossEntropyDiceLoss
+from models import UNet
 from aug.aug import augment
 from config.enums import Strategy
 from config.train import (
     NUM_CLASSES,
     NUM_EPOCHS,
     BATCH_SIZE,
-    MODELS,
     DEVICE,
 )
 
-def verify_model(key):
-    if key not in MODELS:
-        keys = "\n\t".join(
-            f"({m}, {b}, {a})" for m, b, a in MODELS.keys()
-        )
-        print(
-            f"Invalid architecture-backbone combination:\n\t{key}\n"
-            f"Expected one of:\n\t{keys}"
-        )
-        sys.exit(1)
-    return key
-
 def config_unet(num_classes, key, aug):
-    verify_model(key)
-
     adapter, backbone, arcitecture = key
     if aug == Strategy.BASIC:
-        model = MODELS[key](adapter=adapter, backbone=backbone, in_channels=3, num_classes=num_classes).to(DEVICE)
-        # optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4, weight_decay=1e-4)
+        in_channels = 3
     elif aug == Strategy.MULTI:
-        model = MODELS[key](adapter=adapter, backbone=backbone, in_channels=7, num_classes=num_classes).to(DEVICE)
-
-        # adapter_params = list(model.adapter.parameters())
-        # encoder_params = (
-        #     list(model.encoder0.parameters()) +
-        #     list(model.encoder1.parameters()) +
-        #     list(model.encoder2.parameters()) +
-        #     list(model.encoder3.parameters()) +
-        #     list(model.encoder4.parameters())
-        # )
-        # decoder_params = (
-        #     list(model.decoder1.parameters()) +
-        #     list(model.decoder2.parameters()) +
-        #     list(model.decoder3.parameters()) +
-        #     list(model.decoder4.parameters()) +
-        #     list(model.final.parameters())
-        # )
-
-        # optimizer = torch.optim.AdamW(
-        #     [
-        #         {"params": adapter_params, "lr": 1e-3},
-        #         {"params": encoder_params, "lr": 1e-5},
-        #         {"params": decoder_params, "lr": 1e-4},
-        #     ],
-        #     weight_decay=1e-4,
-        # )
-
+        in_channels = 7
     else:
         print(f"Invalid argument: [-d] [--data-augmentation] {aug}")
         sys.exit(1)
+
+    model = UNet(adapter=adapter, backbone=backbone, in_channels=in_channels, num_classes=num_classes).to(DEVICE)
 
     if adapter is None or backbone == "none":
         optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4, weight_decay=1e-4)
@@ -188,9 +149,6 @@ def main():
     model_name = f"{aug_strategy}_{adapter}_{backbone}_{architecture}"
 
     _, ax = plt.subplots()
-
-#     images, masks = next(iter(train_loader))
-#     summary(model, input_data=(images, masks))
 
     for epoch in range(NUM_EPOCHS):
         avg_train_loss = train_epoch(model, optimizer, loss_fn, train_loader, aug)

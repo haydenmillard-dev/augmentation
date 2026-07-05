@@ -16,13 +16,6 @@ import utils.utils as utils
 import utils.tensor as ut
 from aug.aug import augment
 
-MODELS = {
-    ("unet", "none", "none"): UNet,
-    ("unet", "resnet", "none"): UNetResNet,
-    ("unet", "resnet", "input"): UNetResNet,
-    ("unet", "resnet", "multi-layer"): UNetResNetAdapter,
-    ("unet", "resnet", "deep-input"): UNetResNetAdapter,
-}
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
@@ -155,15 +148,6 @@ def prediction_augment(X, aug_strat):
 
 if __name__ == '__main__':
     args = parse_arguments()
-
-    key = (args.architecture, args.backbone, args.mapper)
-    architecture, backbone, adapter = key
-    if key not in MODELS:
-        keys = "\n".join(f"({arch}, {back}, {adapter})" for arch, back, mapper in MODELS.keys())
-        parser.error(
-            f"Invalid architecture-backbone combination:\n\t{key}\n"
-            f"Expected a combination of the following:\n{keys}"
-        )
 
     # Model setup
     aug = args.data_augmentation

@@ -6,26 +6,7 @@ import tkinter as tk
 from tkinter import filedialog
 
 from data.data_loaders import get_val_augs, get_val_augs_multi_channel
-# from models.unet import UNet, UNetResNet, UNetResNetAdapter
-from models.unet import *
 from config.enums import Strategy
-
-# def get_models() -> dict[tuple[str, str, str], torch.nn.Module]:
-#     return {
-#         ("none", "none", "unet"): UNetA,
-#         ("none", "resnet", "unet"): UNetA,
-#         ("input", "resnet", "unet"): UNetA,
-#         ("multi-layer", "resnet", "unet"): UNetA,
-#         ("deep-input", "resnet", "unet"): UNetA,
-#     }
-def get_models() -> dict[tuple[str, str, str], torch.nn.Module]:
-    return {
-        ("none", "none", "unet"): UNet,
-        ("none", "resnet", "unet"): UNetResNet,
-        ("input", "resnet", "unet"): UNetResNet,
-        ("multi-layer", "resnet", "unet"): UNetResNetAdapter,
-        ("deep-input", "resnet", "unet"): UNetResNetAdapter,
-    }
 
 def get_augs() -> dict[str, Strategy]:
     return {
@@ -57,11 +38,6 @@ def parse_arguments():
         help="Backbone Encoder"
     )
     # strategy
-    # parser.add_argument(
-    #     '-d', '--data-augmentation',
-    #     choices=["aug", "multi"],
-    #     default="aug",
-    # )
     parser.add_argument(
         "-d", "--data-augmentation",
         type=strategy_type,
