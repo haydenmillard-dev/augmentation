@@ -1,17 +1,24 @@
 import torch
-
 import argparse
-
 import numpy as np
 from PIL import Image
-
 import tkinter as tk
 from tkinter import filedialog
 
 from data.data_loaders import get_val_augs, get_val_augs_multi_channel
-from models.unet import UNet, UNetResNet, UNetResNetAdapter
+# from models.unet import UNet, UNetResNet, UNetResNetAdapter
+from models.unet import *
+from config.enums import Strategy
 
-def get_models():
+# def get_models() -> dict[tuple[str, str, str], torch.nn.Module]:
+#     return {
+#         ("none", "none", "unet"): UNetA,
+#         ("none", "resnet", "unet"): UNetA,
+#         ("input", "resnet", "unet"): UNetA,
+#         ("multi-layer", "resnet", "unet"): UNetA,
+#         ("deep-input", "resnet", "unet"): UNetA,
+#     }
+def get_models() -> dict[tuple[str, str, str], torch.nn.Module]:
     return {
         ("none", "none", "unet"): UNet,
         ("none", "resnet", "unet"): UNetResNet,
@@ -20,37 +27,79 @@ def get_models():
         ("deep-input", "resnet", "unet"): UNetResNetAdapter,
     }
 
+def get_augs() -> dict[str, Strategy]:
+    return {
+        "none": None,
+        "aug": Strategy.BASIC,
+        "multi": Strategy.MULTI,
+    }
+
+def strategy_type(x: str) -> Strategy:
+    mapping = get_augs()
+    if x not in mapping:
+        raise argparse.ArgumentTypeError(f"Unknown strategy: {x}")
+    return mapping[x]
+
 def parse_arguments():
     parser = argparse.ArgumentParser()
+    # model
     parser.add_argument(
         "-a", "--architecture",
         choices=["unet"],
         default="unet",
         help="Model Architecture"
     )
+    # backbone
     parser.add_argument(
         "-b", "--backbone",
         choices=["none", "resnet"],
         default="none",
         help="Backbone Encoder"
     )
+    # strategy
+    # parser.add_argument(
+    #     '-d', '--data-augmentation',
+    #     choices=["aug", "multi"],
+    #     default="aug",
+    # )
     parser.add_argument(
-        '-d', '--data-augmentation',
-        choices=["aug", "multi"],
-        default="aug",
+        "-d", "--data-augmentation",
+        type=strategy_type,
+        default=Strategy.BASIC,
         help="Data Augmentation Policy:\n\taug  - 3 channel augmentation\n\tmulti - multi-channel augmentation"
     )
+    # adapter
     parser.add_argument(
         '-m', '--mapper',
         choices=["none", "input", "deep-input", "multi-layer"],
         default="none",
         help="Adapter used to map inputs to the backbone:\n\tDefault: none: no adapter\n\tinput: a single-layer InputAdapter\n\tdeep-input: a multi-layer InputAdapter\n\tMultiLayer: a channel-grouped adapter."
     )
+    # debug
+    parser.add_argument(
+        '--debug',
+        choices=["normal", "verbose"],
+        default=None,
+    )
     args = parser.parse_args()
+
+    if args.debug:
+        print_arguments(args)
 
     return args
 
-def get_image_tensor(aug):
+def print_arguments(args) -> None:
+    config = vars(args)
+    width = max(len(k) for k in config) + 5
+
+    print('=' * 100)
+    print(' ARGUMENTS '.center(100, '='))
+    print('=' * 100)
+    for key, value in config.items():
+        print(f"{key + ':':.<{width}}{value}")
+    print('=' * 100)
+
+def open_image():
     root = tk.Tk()
     root.withdraw()
 
@@ -62,14 +111,20 @@ def get_image_tensor(aug):
         ]
     )
 
+    image = Image.open(filepath).convert("RGB")
+
+    return image
+
+def get_image_tensor(aug):
+    image = open_image()
+
     if aug == "aug":
         transform = get_val_augs()
     elif aug == "multi":
         transform = get_val_augs_multi_channel()
-    image = None
 
-    if filepath:
-        image = np.array(Image.open(filepath).convert("RGB"))
+    if image:
+        image = np.array(image)
         image = transform(image=image)["image"]
         image = image.unsqueeze(0)
 

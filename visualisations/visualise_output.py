@@ -42,7 +42,7 @@ if key not in MODELS:
 # Model setup
 aug = args.data_augmentation
 if aug == "aug":
-    train_loader, val_loader, test_loader = get_augmented_data_loaders(batch_size=BATCH_SIZE)
+    train_loader, val_loader, test_loader = get_augmented_data_loaders(aug, batch_size=BATCH_SIZE)
     model = MODELS[key](num_classes=21, in_channels=3, adapter=adapter).to(DEVICE)
 elif aug == "multi":
     train_loader, val_loader, test_loader = get_augmented_data_loaders_multi_channel(batch_size=BATCH_SIZE)

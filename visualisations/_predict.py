@@ -167,36 +167,61 @@ if __name__ == '__main__':
 
     # Model setup
     aug = args.data_augmentation
-    num_classes = 21
-    if aug is Strategy.BASIC:
-        in_channels = 3
-    elif aug is Strategy.MULTI:
-        in_channels = 7
+    aug = "aug" if args.data_augmentation is Strategy.BASIC else "multi"
+
+    if aug == "aug":
+        if adapter == "none":
+            model = MODELS[key](21, in_channels=3).to(DEVICE)
+        else:
+            model = MODELS[key](21, in_channels=3, adapter=adapter).to(DEVICE)
+    elif aug == "multi":
+        model = MODELS[key](21, in_channels=7, adapter=adapter).to(DEVICE)
     else:
-        ValueError(f"{aug} does not match {Strategy.BASIC} or {Strategy.MULTI}")
         print(f"Invalid agument: [-d] [--data-augmentation] {args.data_augmentation}")
-    model = UNetA(adapter=adapter, backbone=backbone, in_channels=in_channels, num_classes=num_classes).to(DEVICE)
+        sys.exit(0)
+    # num_classes = 21
+    # if aug is Strategy.BASIC:
+    #     in_channels = 3
+    # elif aug is Strategy.MULTI:
+    #     in_channels = 7
+    # else:
+    #     ValueError(f"{aug} does not match {Strategy.BASIC} or {Strategy.MULTI}")
+    # model = UNetA(adapter=adapter, backbone=backbone, in_channels=in_channels, num_classes=num_classes).to(DEVICE)
     
-    append_model = f"{aug}_{adapter}_{backbone}_{architecture}"
+    append_model = f"model_---{architecture}_{backbone}_{aug}_{adapter}"
+    # append_model = f"{aug}_{adapter}_{backbone}_{architecture}"
 
     state_dict = torch.load(f"./checkpoints/best_{append_model}.pth", map_location=DEVICE)
     model.load_state_dict(state_dict["model_state_dict"])
     model.to(DEVICE)
 
     while True:
-        image = utils.open_image()
-        X = ut.pil_image_to_tensor(image).unsqueeze(0)
+        # Image is normalised in transform
+        # X.shape = [BATCH_SIZE, C, 256, 256]
+        #   -> C = 7 if aug == "multi" | C = 3 if aug == "aug" 
+
+        X = get_image_tensor(aug)
+
+        # image = utils.open_image()
+        # X = ut.pil_image_to_tensor(image).unsqueeze(0)
+        # print(X.shape)
 
         if X is None:
             break
-        X = prediction_augment(X, aug)
+        # X = prediction_augment(X, aug)
 
+        if aug == "multi":
+            posterize = A.Compose([A.Posterize(num_bits=(3, 3), p=1.0), A.ToTensorV2()])
+            rgb = X[:, 0:3].squeeze().permute(1, 2, 0).cpu().numpy()
+            X[0, 3:6] = posterize(image=rgb)["image"]
         prediction = predict(X.to(DEVICE), model).squeeze(0)
+        print(f'prediction.shape={prediction.shape}')
+        print(f'unique: {torch.unique(prediction, return_counts=True)}')
         
         for i in range(X.shape[0]):
             if aug is Strategy.BASIC:
                 plot_3_channel_prediction(X, prediction)
-            elif aug is Strategy.MULTI:
+            elif aug is Strategy.MULTI or aug == 'multi':
                 plot_multi_channel_prediction(X, prediction)
             else:
                 break
