@@ -9,7 +9,7 @@ import torch.nn as nn
 import kornia as K
 import albumentations as A
 
-from models.unet import UNetResNet, UNet, UNetResNetAdapter, UNetA
+from models.unet import UNet
 import visualisations.image_utils as iu
 from config.enums import Strategy
 import utils.utils as utils
@@ -148,9 +148,12 @@ def prediction_augment(X, aug_strat):
 
 if __name__ == '__main__':
     args = parse_arguments()
+    aug = args.data_augmentation
+    adapter = args.mapper
+    backbone = args.backbone
+    architecture = args.architecture
 
     # Model setup
-    aug = args.data_augmentation
     num_classes = 21
     if aug is Strategy.BASIC:
         in_channels = 3
@@ -159,7 +162,7 @@ if __name__ == '__main__':
     else:
         ValueError(f"{aug} does not match {Strategy.BASIC} or {Strategy.MULTI}")
         print(f"Invalid agument: [-d] [--data-augmentation] {args.data_augmentation}")
-    model = UNetA(adapter=adapter, backbone=backbone, in_channels=in_channels, num_classes=num_classes).to(DEVICE)
+    model = UNet(adapter=adapter, backbone=backbone, in_channels=in_channels, num_classes=num_classes).to(DEVICE)
     
     append_model = f"{aug}_{adapter}_{backbone}_{architecture}"
 

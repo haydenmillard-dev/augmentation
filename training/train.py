@@ -8,7 +8,7 @@ from torchinfo import summary
 import utils.utils as utils
 from data.loaders import get_data_loaders
 from training.cost import CrossEntropyDiceLoss
-from models import UNet
+from models.unet import UNet
 from aug.aug import augment
 from config.enums import Strategy
 from config.train import (

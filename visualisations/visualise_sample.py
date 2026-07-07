@@ -58,12 +58,9 @@ def multi(example):
         else:
             return
 
-        # example = eval(input("Enter the next example:\n"))
-
 def main():
     args = visualise_sample_args()
     aug = args.strategy
-
     
     if aug == Strategy.BASIC:
         basic(args.example)

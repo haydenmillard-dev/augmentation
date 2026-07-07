@@ -2,6 +2,7 @@ checkpoints/
 *.pth
 *.pt
 
+graphs/
 *.png
 *.jpg
 *.jpeg
