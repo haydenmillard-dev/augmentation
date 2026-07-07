@@ -36,7 +36,7 @@ python -m training.train -a unet -b resnet -d multi -m deep-input
 ## Making a Prediction:
 This requires that a model has already been trained and saved to a file named best_{data-augmenation}_{mapper}_{backbone}_{architecture}.pth in a directory named checkpoints.<br>
 > [!TIP]
-> A .pth file has already been saved in the weights directory. Move this file to the checkpoints directory so you don't have to train a neural network from scratch.
+> A .pth file has already been saved in the assets/weights directory. Move this file to the checkpoints directory so you don't have to train a neural network from scratch.
 Run the following command:
 ```bash
 python -m visualisations.predict -a unet -b resnet -d multi -m deep-input
