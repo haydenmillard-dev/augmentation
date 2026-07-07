@@ -3,7 +3,64 @@ The quality of input data plays a major role in the quality of outputs of neural
 
 ## What is data augmentation?
 These are all techniques that modify input data to aid in the generalisation of a learning algorithm.
-By changing the inputs, we aim to highlight generalisable features that reduce overfitting. 
+By changing the inputs, we aim to highlight generalisable features that reduce overfitting. This is particularly useful for small datasets like the VOC 2012 dataset as it can extend the effective size of the dataset.
+
+## Example of Data Augmentations and the Prediction
+The original image is not passed to the model. Instead it is processed 3 times:<br>
+
+- First, it is normalised. This is given to the model in the first 3 input channels.
+- Second, it is posterised. This is given to the model in the following 3 input channels.
+- Finally, Canny edge detection is computed. This is given in the seventh and final input channel.
+
+
+### Some examples follow
+<p>
+The top rows represent the augmentations given to the neural network.<br>
+The bottom rows depict the overlaid prediction for the input image.<br>
+</p>
+
+![Model Architecture](assets/images/car.png)
+![Model Architecture](assets/images/aeroplane.png)
+![Model Architecture](assets/images/boats.png)
+
+## Training a Neural Network
+Run the following command:
+```bash
+python -m training.train -a unet -b resnet -d multi -m deep-input
+```
+[-a] [--architecture] Selects the model architecture | Choices=[unet]<br>
+[-b] [--backbone] Selects the encoder backbone | Choices=[resnet, none] | resnet is a pretrained ResNet34 model. none uses the default U-Net encoder which is not pretrained.<br>
+[-d] [--data-augmentation] Selects the augmentation strategy | Choices=[aug, multi] | aug implements a basic 3 channel augmentation | multi implements 3 separate augmenations stacked upon each other and requires a mapper.<br>
+[-m] [--mapper] Selects the input adapter | Choices=[none, input, multi-layer, deep-input] | deep-input is recommended as it gives the best results.
+
+## Making a Prediction:
+This requires that a model has already been trained and saved to a file named best_{data-augmenation}_{mapper}_{backbone}_{architecture}.pth in a directory named checkpoints.<br>
+> [!TIP]
+> A .pth file has already been saved in the weights directory. Move this file to the checkpoints directory so you don't have to train a neural network from scratch.
+Run the following command:
+```bash
+python -m visualisations.predict -a unet -b resnet -d multi -m deep-input
+```
+The above command takes the same arguments as training\train.py
+You will be prompted to select an image from your local machine for the model to predict the semantic bounds.
+> [!NOTE]
+> There are only 20 classes in the PASCAL VOC 2012 dataset, 21 if the background class is included. Therefore, it is recommended to use images containing the below classes.
+
+## PASCAL VOC 2012 Classes
+
+| | | | |
+|---|---|---|---|
+| Background | Aeroplane | Bicycle | Bird |
+| Boat | Bottle | Bus | Car |
+| Cat | Chair | Cow | Dining Table |
+| Dog | Horse | Motorbike | Person |
+| Potted Plant | Sheep | Sofa | Train |
+| TV/Monitor |  |  |  |
+
+## Fractures in the Model
+Although the model generally produces good segmentations, it is not a guaruntee that it will always produce an acceptable mask.<br>
+Below is a demonstration of a failure mode.
+![Model Architecture](assets/images/person-table-chair.png)
 
 ## ResNet
 Academic resource: https://arxiv.org/abs/1512.03385
