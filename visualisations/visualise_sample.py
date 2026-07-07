@@ -43,20 +43,15 @@ def plot_image(image: Image.Image, augment: callable):
     plt.show()
 
 def multi(example):
-    while True:
-        if isinstance(example, int):
-            dataset = load_dataset()
-            image, mask = dataset[example]
-            plot_image(image, multi_transform)
-        elif isinstance(example, Path):
-            image = Image.open(example)
-            plot_image(image, multi_transform)
-
-        response = input("Terminate program?\n")
-        if response == 'y':
-            return
-        else:
-            return
+    if isinstance(example, int):
+        dataset = load_dataset()
+        image, mask = dataset[example]
+        plot_image(image, multi_transform)
+    elif isinstance(example, Path):
+        image = Image.open(example)
+        plot_image(image, multi_transform)
+    else:
+        raise ValueError(f'The example must either be an integer number or a Path. Got {example}')
 
 def main():
     args = visualise_sample_args()

@@ -5,7 +5,8 @@ from PIL import Image
 import tkinter as tk
 from tkinter import filedialog
 
-from data.data_loaders import get_val_augs, get_val_augs_multi_channel
+from aug.aug import augment
+from utils.tensor import pil_image_to_tensor
 from config.enums import Strategy
 
 def get_augs() -> dict[str, Strategy]:
@@ -76,6 +77,16 @@ def print_arguments(args) -> None:
     print('=' * 100)
 
 def open_image():
+    """
+    Prompts the user for an image using the system dialogue
+
+    Returns
+    -------
+    PIL.Image.Image
+        The opened image
+    None
+        If the user closed the system dialogue without selecting a file
+    """
     root = tk.Tk()
     root.withdraw()
 
@@ -87,22 +98,25 @@ def open_image():
         ]
     )
 
-    image = Image.open(filepath).convert("RGB")
+    if filepath:
+        return Image.open(filepath).convert("RGB")
+    else:
+        return None
 
-    return image
+def prompt_image():
+    """
+    Prompts a user for an image and returns it as a torch.Tensor
 
-def get_image_tensor(aug):
+    Returns
+    -------
+    torch.Tensor
+        Represents the image
+    None
+        If the user didn't provide an image
+    """
     image = open_image()
-
-    if aug == "aug":
-        transform = get_val_augs()
-    elif aug == "multi":
-        transform = get_val_augs_multi_channel()
-
     if image:
-        image = np.array(image)
-        image = transform(image=image)["image"]
-        image = image.unsqueeze(0)
+        image = pil_image_to_tensor(image).unsqueeze(0)
 
     return image
 

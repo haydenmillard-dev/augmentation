@@ -7,6 +7,10 @@ graphs/
 *.jpg
 *.jpeg
 
+!assets/
+!assets/images/
+!assets/images/**
+
 __pycache__/
 *.pyc
 

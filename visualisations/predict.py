@@ -1,6 +1,6 @@
 import sys
 
-from utils.utils import parse_arguments, get_image_tensor
+from utils.utils import parse_arguments, prompt_image
 
 import matplotlib.pyplot as plt
 
@@ -24,8 +24,6 @@ def predict(X, model):
 
     with torch.inference_mode():
         logits = model(X)
-
-    print(logits.shape)
 
     return torch.argmax(logits, dim=1)
 
@@ -142,7 +140,7 @@ def plot_multi_channel_prediction(input, prediction):
     plt.tight_layout()
     plt.show()
 
-def prediction_augment(X, aug_strat):
+def apply_augment(X, aug_strat):
     X = K.geometry.transform.Resize((256, 256))(X)
     return augment(X, strategy=aug_strat, training_mode=False)
 
@@ -171,12 +169,11 @@ if __name__ == '__main__':
     model.to(DEVICE)
 
     while True:
-        image = utils.open_image()
-        X = ut.pil_image_to_tensor(image).unsqueeze(0)
+        X = utils.prompt_image()
 
         if X is None:
             break
-        X = prediction_augment(X, aug)
+        X = apply_augment(X, aug)
 
         prediction = predict(X.to(DEVICE), model).squeeze(0)
         
