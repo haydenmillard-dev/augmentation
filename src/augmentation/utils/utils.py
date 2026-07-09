@@ -5,9 +5,10 @@ from PIL import Image
 import tkinter as tk
 from tkinter import filedialog
 
-from aug.aug import augment
-from utils.tensor import pil_image_to_tensor
-from config.enums import Strategy
+# from aug.aug import augment
+from augmentation.data.augment import apply_transform
+from augmentation.utils.tensor import pil_image_to_tensor
+from augmentation.config.enums import Strategy
 
 def get_augs() -> dict[str, Strategy]:
     return {

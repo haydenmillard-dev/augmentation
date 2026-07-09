@@ -1,6 +1,7 @@
-from config.enums import Strategy
 import argparse
 from pathlib import Path
+
+from augmentation.config.enums import Strategy
 
 def get_augs():
     return {

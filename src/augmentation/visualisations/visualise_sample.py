@@ -1,14 +1,14 @@
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
-
-from data.loaders import load_dataset
-from config.enums import Strategy
-import utils.tensor as ut
-from utils.parse import visualise_sample_args
-from data.transforms.multi import transform as multi_transform
 from pathlib import Path
 from PIL import Image
+
+from augmentation.data.loaders import load_dataset
+from augmentation.config.enums import Strategy
+import augmentation.utils.tensor as ut
+from augmentation.utils.parse import visualise_sample_args
+from augmentation.data.transforms.multi import transform as multi_transform
 
 def basic(dataset, index):
     pass

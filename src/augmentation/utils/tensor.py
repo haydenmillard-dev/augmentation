@@ -38,7 +38,7 @@ def tensor_to_pil_image(image: torch.Tensor) -> Image.Image:
         image = image.cpu().numpy()
         return Image.fromarray(image, mode="L")
 
-    image = image.permute(1, 2, 0)
+    # image = image.permute(1, 2, 0)
     image = image.cpu().numpy()
     
     return Image.fromarray(image)

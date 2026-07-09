@@ -5,13 +5,14 @@ import torch.nn as nn
 import matplotlib.pyplot as plt
 from torchinfo import summary
 
-import utils.utils as utils
-from data.loaders import get_data_loaders
-from training.cost import CrossEntropyDiceLoss
-from models.unet import UNet
-from aug.aug import augment
-from config.enums import Strategy
-from config.train import (
+from augmentation.utils import utils
+from augmentation.data.loaders import get_data_loaders
+from augmentation.training import CrossEntropyDiceLoss
+from augmentation.models.unet import UNet
+from augmentation.data.augment import apply_transform
+from augmentation.config.enums import Strategy
+from augmentation.config.paths import CHECKPOINTS
+from augmentation.config.train import (
     NUM_CLASSES,
     NUM_EPOCHS,
     BATCH_SIZE,
@@ -56,7 +57,7 @@ def train_epoch(model, optimizer, loss_fn, train_loader, aug):
 
     for X, y in train_loader:
         X, y = X.to(DEVICE), y.to(DEVICE)
-        X, y = augment(X, y, aug)
+        X, y = apply_transform(X, y, aug)
 
         loss = loss_fn(model(X), y.long())
 
@@ -76,7 +77,7 @@ def val_epoch(model, loss_fn, val_loader, aug):
     with torch.inference_mode():
         for X, y in val_loader:
             X, y = X.to(DEVICE), y.to(DEVICE)
-            X, y = augment(X, y, aug)
+            X, y = apply_transform(X, y, aug, training_mode=False)
 
             loss = loss_fn(model(X), y.long())
             total_loss += loss.item() * X.shape[0]
@@ -171,9 +172,9 @@ def main():
             best_val_loss = avg_val_loss
 
         checkpoint_path = (
-            f"./checkpoints/best_{model_name}.pth"
+            CHECKPOINTS / f"best_{model_name}.pth"
             if is_best
-            else f"./checkpoints/last_{model_name}.pth"
+            else CHECKPOINTS / f"last_{model_name}.pth"
         )
         save_checkpoint(
             checkpoint_path, model, optimizer, epoch,

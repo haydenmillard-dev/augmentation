@@ -1,8 +1,8 @@
 import torch
 
-from config.enums import Strategy
-from data.transforms.basic import transform as basic_transform
-from data.transforms.multi import transform as multi_transform
+from augmentation.config.enums import Strategy
+from augmentation.data.transforms.basic import transform as basic_transform
+from augmentation.data.transforms.multi import transform as multi_transform
 # from data.transforms.advanced import transform as advanced_transform
 
 TRANSFORMS = {
@@ -21,7 +21,7 @@ def get_transform(strategy: Strategy):
     except KeyError:
         raise ValueError(f"Unknown strategy: {strategy}")
 
-def augment(image: torch.Tensor, mask: torch.Tensor = None, strategy: Strategy = Strategy.BASIC, training_mode=True) -> tuple[torch.Tensor, torch.Tensor]:
+def apply_transform(image: torch.Tensor, mask: torch.Tensor = None, strategy: Strategy = Strategy.BASIC, training_mode=True) -> tuple[torch.Tensor, torch.Tensor]:
     """
     Returns the augmented image (B,C,H,W) and mask (B, H, W) torch.Tensors
 

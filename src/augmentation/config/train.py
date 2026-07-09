@@ -1,5 +1,5 @@
 import torch
-import utils.utils as utils
+import augmentation.utils.utils as utils
 
 # Constants
 NUM_CLASSES = 21

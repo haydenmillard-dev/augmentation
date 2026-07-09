@@ -1,6 +1,5 @@
 import sys
 
-from utils.utils import parse_arguments, prompt_image
 
 import matplotlib.pyplot as plt
 
@@ -9,15 +8,19 @@ import torch.nn as nn
 import kornia as K
 import albumentations as A
 
-from models.unet import UNet
-import visualisations.image_utils as iu
-from config.enums import Strategy
-import utils.utils as utils
-import utils.tensor as ut
-from aug.aug import augment
+from augmentation.utils.utils import parse_arguments, prompt_image
+from augmentation.models import UNet
+import augmentation.visualisations.image_utils as iu
+from augmentation.config.enums import Strategy
+from augmentation.config.paths import CHECKPOINTS
+import augmentation.utils.utils as utils
+import augmentation.utils.tensor as ut
+#from augmentation.aug.aug import augment
+from augmentation.data.augment import apply_transform
+from augmentation.data.transforms.augs import resize
 
-DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
+# DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+DEVICE = torch.device('cpu')
 
 def predict(X, model):
     model.eval()
@@ -162,9 +165,19 @@ if __name__ == '__main__':
         print(f"Invalid agument: [-d] [--data-augmentation] {args.data_augmentation}")
     model = UNet(adapter=adapter, backbone=backbone, in_channels=in_channels, num_classes=num_classes).to(DEVICE)
     
-    append_model = f"{aug}_{adapter}_{backbone}_{architecture}"
+    append_model = f"_{adapter}_{backbone}_{architecture}"
+    if aug is Strategy.BASIC:
+        append_model = 'basic' + append_model
+    elif aug is Strategy.MULTI:
+        append_model = 'multi' + append_model
+    else:
+        raise ValueError(f'Augmentation strategy should be either [Strategy.BASIC] or [Strategy.MULTI]. Got {aug}')
 
-    state_dict = torch.load(f"./checkpoints/best_{append_model}.pth", map_location=DEVICE)
+    # path = 'D:\\Honours\\research\\src\\checkpoints\\best_multi_deep-input_resnet_unet.pth'
+    path = CHECKPOINTS / f"best_{append_model}.pth"
+    print(path)
+    state_dict = torch.load(path, map_location=DEVICE)
+
     model.load_state_dict(state_dict["model_state_dict"])
     model.to(DEVICE)
 
@@ -173,7 +186,7 @@ if __name__ == '__main__':
 
         if X is None:
             break
-        X = apply_augment(X, aug)
+        X = apply_transform(resize()(X), strategy=aug, training_mode=False)
 
         prediction = predict(X.to(DEVICE), model).squeeze(0)
         
