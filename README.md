@@ -1,27 +1,15 @@
 # Data Augmentation Strategies for Improving DCNN Outputs
 The quality of input data plays a major role in the quality of outputs of neural networks.
 
-## What is data augmentation?
-These are all techniques that modify input data to aid in the generalisation of a learning algorithm.
-By changing the inputs, we aim to highlight generalisable features that reduce overfitting. This is particularly useful for small datasets like the VOC 2012 dataset as it can extend the effective size of the dataset.
-
-## Example of Data Augmentations and the Prediction
-The original image is not passed to the model. Instead it is processed 3 times:<br>
-
-- First, it is normalised. This is given to the model in the first 3 input channels.
-- Second, it is posterised. This is given to the model in the following 3 input channels.
-- Finally, Canny edge detection is computed. This is given in the seventh and final input channel.
-
-
-### Some examples follow
-<p>
-The top rows represent the augmentations given to the neural network.<br>
-The bottom rows depict the overlaid prediction for the input image.<br>
-</p>
-
-![Model Architecture](assets/images/car.png)
-![Model Architecture](assets/images/aeroplane.png)
-![Model Architecture](assets/images/boats.png)
+> [!IMPORTANT]
+> ## Pretrained Models
+> Download the pretrained model weights from the Releases page:<br>
+> https://github.com/username/repository/releases<br>
+> <br>Place it in
+> ```txt
+> checkpoints/
+> └─── model_best.pth
+> ```
 
 ## Training a Neural Network
 Run the following command:
@@ -35,8 +23,6 @@ python -m training.train -a unet -b resnet -d multi -m deep-input
 
 ## Making a Prediction:
 This requires that a model has already been trained and saved to a file named best_{data-augmenation}_{mapper}_{backbone}_{architecture}.pth in a directory named checkpoints.<br>
-> [!TIP]
-> A .pth file has already been saved in the assets/weights directory. Move this file to the checkpoints directory so you don't have to train a neural network from scratch.
 Run the following command:
 ```bash
 python -m visualisations.predict -a unet -b resnet -d multi -m deep-input
@@ -45,6 +31,28 @@ The above command takes the same arguments as training\train.py
 You will be prompted to select an image from your local machine for the model to predict the semantic bounds.
 > [!NOTE]
 > There are only 20 classes in the PASCAL VOC 2012 dataset, 21 if the background class is included. Therefore, it is recommended to use images containing the below classes.
+
+
+## What is data augmentation?
+These are all techniques that modify input data to aid in the generalisation of a learning algorithm.
+By changing the inputs, we aim to highlight generalisable features that reduce overfitting. This is particularly useful for small datasets like the VOC 2012 dataset as it can extend the effective size of the dataset.
+
+## Example of Data Augmentations and the Prediction
+The original image is not passed to the model. Instead it is processed 3 times:<br>
+
+- First, it is normalised. This is given to the model in the first 3 input channels.
+- Second, it is posterised. This is given to the model in the following 3 input channels.
+- Finally, Canny edge detection is computed. This is given in the seventh and final input channel.
+
+### Some examples follow
+<p>
+The top rows represent the augmentations given to the neural network.<br>
+The bottom rows depict the overlaid prediction for the input image.<br>
+</p>
+
+![Model Architecture](assets/images/car.png)
+![Model Architecture](assets/images/aeroplane.png)
+![Model Architecture](assets/images/boats.png)
 
 ## PASCAL VOC 2012 Classes
 
@@ -60,6 +68,7 @@ You will be prompted to select an image from your local machine for the model to
 ## Fractures in the Model
 Although the model generally produces good segmentations, it is not a guaruntee that it will always produce an acceptable mask.<br>
 Below is a demonstration of a failure mode.
+<br><br>
 ![Model Architecture](assets/images/person-table-chair.png)
 
 ## ResNet
