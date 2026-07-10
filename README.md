@@ -4,7 +4,7 @@ The quality of input data plays a major role in the quality of outputs of neural
 > [!IMPORTANT]
 > ## Pretrained Models
 > Download the pretrained model weights from the Releases page:<br>
-> https://github.com/username/repository/releases<br>
+> https://github.com/haydenmillard-dev/augmentation/releases<br>
 > <br>Place it in
 > ```txt
 > checkpoints/
