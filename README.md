@@ -14,7 +14,7 @@ The quality of input data plays a major role in the quality of outputs of neural
 ## Training a Neural Network
 Run the following command:
 ```bash
-python -m training.train -a unet -b resnet -d multi -m deep-input
+python -m augmentation.training.train -a unet -b resnet -d multi -m deep-input
 ```
 [-a] [--architecture] Selects the model architecture | Choices=[unet]<br>
 [-b] [--backbone] Selects the encoder backbone | Choices=[resnet, none] | resnet is a pretrained ResNet34 model. none uses the default U-Net encoder which is not pretrained.<br>
@@ -25,7 +25,7 @@ python -m training.train -a unet -b resnet -d multi -m deep-input
 This requires that a model has already been trained and saved to a file named best_{data-augmenation}_{mapper}_{backbone}_{architecture}.pth in a directory named checkpoints.<br>
 Run the following command:
 ```bash
-python -m visualisations.predict -a unet -b resnet -d multi -m deep-input
+python -m augmentation.visualisations.predict -a unet -b resnet -d multi -m deep-input
 ```
 The above command takes the same arguments as training\train.py
 You will be prompted to select an image from your local machine for the model to predict the semantic bounds.
